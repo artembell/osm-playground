@@ -1,0 +1,24 @@
+{
+  "name": "osm-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artembell/osm-playground.git"
+  },
+  "keywords": [],"author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artembell/osm-playground/issues"
+  },
+  "homepage": "https://github.com/artembell/osm-playground#readme",
+  "devDependencies": {
+    "vite": "^7.1.7"
+  }
+}
