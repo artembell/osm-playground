@@ -5,6 +5,7 @@ import * as THREE from 'three';
 
 import { CustomLayerExtras, ModelTransform } from './types';
 import type { FeatureCollection, LineString } from 'geojson';
+import { installKeyboardToggle, installUserInteractionGuards } from './functions/track-center';
 import maplibregl, { LngLatLike } from 'maplibre-gl';
 
 import { createCustomThreeLayer } from './functions/dynamic-layer';
@@ -22,6 +23,8 @@ function main(): void {
         anchorSceneToBerlin(map, modelAltitude, modelTransform, layer);
         ensureEmptyRouteSourceAndLayer(map);
         fetchAndDrawSampleRoute(map, modelAltitude, modelTransform, layer);
+        installKeyboardToggle(map, layer);
+        installUserInteractionGuards(map, layer);
     });
 }
 

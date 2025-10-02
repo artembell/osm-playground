@@ -5,6 +5,7 @@ import { CustomLayerExtras, ModelTransform } from "../types";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { advanceCarAlongPath } from "./move-car";
 import maplibregl from 'maplibre-gl';
+import { updateMapCenterIfTracking } from './track-center';
 
 function buildViewProjection(
     args: any,
@@ -155,6 +156,8 @@ export function createCustomThreeLayer(
             this._lastTs = now;
 
             advanceCarAlongPath(this, deltaSec);
+
+            updateMapCenterIfTracking(this, modelAltitude, modelTransform);
 
             const { viewProj } = buildViewProjection(args, modelTransform);
 
