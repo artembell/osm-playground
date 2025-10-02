@@ -101,7 +101,7 @@ export function createCustomThreeLayer(
                     const bbox = new THREE.Box3().setFromObject(this.dynamicCar);
                     const size = new THREE.Vector3();
                     bbox.getSize(size);
-                    const desiredLengthMeters = 30;
+                    const desiredLengthMeters = 3;
                     const currentLengthUnits = Math.max(size.x, size.y, size.z) || 1;
                     const uniformScale = desiredLengthMeters / currentLengthUnits;
                     this.dynamicCar.scale.set(uniformScale, uniformScale, uniformScale);
