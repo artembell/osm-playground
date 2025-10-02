@@ -4,7 +4,6 @@ import { CustomLayerExtras, ModelTransform } from "../types";
 
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { advanceCarAlongPath } from "./move-car";
-import carUrl from '../../models/car.gltf?url';
 import maplibregl from 'maplibre-gl';
 
 function buildViewProjection(
@@ -84,8 +83,9 @@ export function createCustomThreeLayer(
 
             /** Just load model */
             const loader = new GLTFLoader();
+            const carModelUrl = `${import.meta.env.BASE_URL}models/car.gltf`;
             loader.load(
-                carUrl,
+                carModelUrl,
                 (gltf) => {
                     /** TODO: for now shadows are disabled */
                     gltf.scene.traverse((node: THREE.Object3D & { isMesh?: boolean; castShadow?: boolean; receiveShadow?: boolean; }) => {
