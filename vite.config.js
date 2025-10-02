@@ -1,3 +1,3 @@
 export default {
-    // config options
-}
+  assetsInclude: ['**/*.gltf', '**/*.bin']
+};
