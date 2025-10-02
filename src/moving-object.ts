@@ -11,6 +11,7 @@ import maplibregl, { LngLatLike } from 'maplibre-gl';
 import { createCustomThreeLayer } from './functions/dynamic-layer';
 import { fetchAndDrawSampleRoute } from './functions/route-builder';
 import { installOverlayControls } from './functions/overlay-controls';
+import { mapResources } from './functions/map-resources';
 
 const origin: LngLatLike = [148.9819, -35.39847];
 const berlinOrigin: LngLatLike = [13.405, 52.52];
@@ -20,10 +21,12 @@ function main(): void {
     const { modelAltitude, modelTransform } = createModelTransform(origin);
     const layer = createCustomThreeLayer(modelAltitude, modelTransform);
     map.on('style.load', () => {
-        addCustomLayer(map, layer);
+        map.addLayer(layer);
+
         anchorSceneToBerlin(map, modelAltitude, modelTransform, layer);
         ensureEmptyRouteSourceAndLayer(map);
         fetchAndDrawSampleRoute(map, modelAltitude, modelTransform, layer);
+
         installKeyboardToggle(map, layer);
         installUserInteractionGuards(map, layer);
         installOverlayControls(map, modelAltitude, modelTransform, layer);
@@ -63,10 +66,6 @@ function createModelTransform(origin: maplibregl.LngLatLike): {
     return { modelAltitude, modelTransform };
 }
 
-function addCustomLayer(map: maplibregl.Map, layer: maplibregl.CustomLayerInterface): void {
-    map.addLayer(layer as any);
-}
-
 function anchorSceneToBerlin(
     map: maplibregl.Map,
     modelAltitude: number,
@@ -95,19 +94,24 @@ function anchorSceneToBerlin(
 }
 
 function ensureEmptyRouteSourceAndLayer(map: maplibregl.Map): void {
-    if (!map.getSource('route')) {
-        const empty: FeatureCollection<LineString> = { type: 'FeatureCollection', features: [] };
-        map.addSource('route', {
+    if (!map.getSource(mapResources.sources.ROUTE_LINE)) {
+        const empty: FeatureCollection<LineString> = {
+            type: 'FeatureCollection',
+            features: []
+        };
+
+        const source: maplibregl.GeoJSONSourceSpecification = {
             type: 'geojson',
             data: empty,
-        } as maplibregl.GeoJSONSourceSpecification);
+        };
+        map.addSource(mapResources.sources.ROUTE_LINE, source);
     }
 
-    if (!map.getLayer('route-line')) {
+    if (!map.getLayer(mapResources.layers.ROUTE_LINE)) {
         map.addLayer({
-            id: 'route-line',
+            id: mapResources.layers.ROUTE_LINE,
             type: 'line',
-            source: 'route',
+            source: mapResources.sources.ROUTE_LINE,
             paint: {
                 'line-color': '#ff5722',
                 'line-width': 4,
@@ -116,26 +120,31 @@ function ensureEmptyRouteSourceAndLayer(map: maplibregl.Map): void {
         } as maplibregl.LineLayerSpecification);
     }
 
-    if (!map.getSource('route-joints')) {
-        const emptyJoints: FeatureCollection<Point> = { type: 'FeatureCollection', features: [] };
-        map.addSource('route-joints', {
+    if (!map.getSource(mapResources.sources.ROUTE_JOINTS)) {
+        const emptyJoints: FeatureCollection<Point> = {
+            type: 'FeatureCollection',
+            features: []
+        };
+        const source: maplibregl.GeoJSONSourceSpecification = {
             type: 'geojson',
             data: emptyJoints,
-        } as maplibregl.GeoJSONSourceSpecification);
+        };
+        map.addSource(mapResources.sources.ROUTE_JOINTS, source);
     }
 
-    if (!map.getLayer('route-joints')) {
-        map.addLayer({
-            id: 'route-joints',
+    if (!map.getLayer(mapResources.layers.ROUTE_JOINTS)) {
+        const layer: maplibregl.CircleLayerSpecification = {
+            id: mapResources.layers.ROUTE_JOINTS,
             type: 'circle',
-            source: 'route-joints',
+            source: mapResources.sources.ROUTE_JOINTS,
             paint: {
                 'circle-radius': 5,
                 'circle-color': '#00c853',
                 'circle-stroke-color': '#ffffff',
                 'circle-stroke-width': 1.5,
             },
-        } as maplibregl.CircleLayerSpecification);
+        };
+        map.addLayer(layer);
     }
 }
 

@@ -2,9 +2,10 @@ import * as THREE from 'three';
 
 import { CustomLayerExtras, ModelTransform } from "../types";
 import { Feature, FeatureCollection, LineString, Point, Position } from "geojson";
-import { fetchRouteLineString, lineStringToFeature } from "../services/routeService";
+import maplibregl, { GeoJSONSource } from 'maplibre-gl';
 
-import maplibregl from 'maplibre-gl';
+import { fetchRouteLineString } from "../services/routeService";
+import { mapResources } from './map-resources';
 
 const addSegmentJoints = (
     map: maplibregl.Map,
@@ -12,6 +13,7 @@ const addSegmentJoints = (
 ) => {
     const coords: Position[] = lineString.coordinates;
     const jointFeatures: Feature<Point>[] = [];
+
     for (let i = 0; i < coords.length; i++) {
         const p = coords[i] as Position;
         jointFeatures.push({
@@ -20,10 +22,16 @@ const addSegmentJoints = (
             properties: {},
         });
     }
-    const jointsCollection: FeatureCollection<Point> = { type: 'FeatureCollection', features: jointFeatures };
-    const jointsSrc = map.getSource('route-joints') as maplibregl.GeoJSONSource | undefined;
-    if (jointsSrc) {
-        jointsSrc.setData(jointsCollection);
+
+    const jointsCollection: FeatureCollection<Point> = {
+        type: 'FeatureCollection',
+        features: jointFeatures
+    };
+
+    /** Specified source always exists. Its created explicitly in the beginning. */
+    const jointsSource: maplibregl.GeoJSONSource = map.getSource(mapResources.sources.ROUTE_JOINTS)!;
+    if (jointsSource) {
+        jointsSource.setData(jointsCollection);
     }
 
     return { coords };
@@ -43,10 +51,20 @@ export function fetchAndDrawSampleRoute(
 
             const { lineString } = await fetchRouteLineString();
 
-            const feature: Feature<LineString> = lineStringToFeature(lineString);
-            const collection: FeatureCollection<LineString> = { type: 'FeatureCollection', features: [feature] };
-            (map.getSource('route') as maplibregl.GeoJSONSource).setData(collection);
+            const feature: Feature<LineString> = {
+                type: "Feature",
+                geometry: lineString,
+                properties: {},
+            };
 
+            const collection: FeatureCollection<LineString> = {
+                type: 'FeatureCollection',
+                features: [feature]
+            };
+
+            /** Specified source always exists. Its created explicitly in the beginning. */
+            const routeLineSource: GeoJSONSource = map.getSource(mapResources.sources.ROUTE_LINE)!;
+            routeLineSource.setData(collection);
 
             const { coords } = addSegmentJoints(map, lineString);
 
@@ -67,6 +85,7 @@ export function fetchAndDrawSampleRoute(
                 startLngLat as maplibregl.LngLatLike,
                 modelAltitude
             );
+
             const nextMerc = maplibregl.MercatorCoordinate.fromLngLat(
                 nextLngLat as maplibregl.LngLatLike,
                 modelAltitude
@@ -85,9 +104,11 @@ export function fetchAndDrawSampleRoute(
                 layer.dynamicCar.position.set(0, layer._heightOffsetMeters, 0);
                 layer.dynamicCar.rotation.y = heading;
             } else {
-                layer._routeStart = { position: new THREE.Vector3(0, layer._heightOffsetMeters, 0), heading };
+                layer._routeStart = {
+                    position: new THREE.Vector3(0, layer._heightOffsetMeters, 0),
+                    heading
+                };
             }
-
 
             /** Calculate values for Three.js */
             const toLocal = (lnglat: Position): THREE.Vector3 => {
