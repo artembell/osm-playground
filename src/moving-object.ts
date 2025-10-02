@@ -10,6 +10,7 @@ import maplibregl, { LngLatLike } from 'maplibre-gl';
 
 import { createCustomThreeLayer } from './functions/dynamic-layer';
 import { fetchAndDrawSampleRoute } from './functions/route-builder';
+import { installOverlayControls } from './functions/overlay-controls';
 
 const origin: LngLatLike = [148.9819, -35.39847];
 const berlinOrigin: LngLatLike = [13.405, 52.52];
@@ -25,6 +26,7 @@ function main(): void {
         fetchAndDrawSampleRoute(map, modelAltitude, modelTransform, layer);
         installKeyboardToggle(map, layer);
         installUserInteractionGuards(map, layer);
+        installOverlayControls(map, modelAltitude, modelTransform, layer);
     });
 }
 
