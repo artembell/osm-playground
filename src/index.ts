@@ -2,4 +2,4 @@
 // import "./earth"
 // import "./build-route-realtime"
 
-import "./put-satellite-on-map";
+import "./moving-object";
