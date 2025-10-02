@@ -4,7 +4,7 @@ import './style.css';
 import * as THREE from 'three';
 
 import { CustomLayerExtras, ModelTransform } from './types';
-import type { FeatureCollection, LineString } from 'geojson';
+import type { FeatureCollection, LineString, Point } from 'geojson';
 import { installKeyboardToggle, installUserInteractionGuards } from './functions/track-center';
 import maplibregl, { LngLatLike } from 'maplibre-gl';
 
@@ -114,6 +114,28 @@ function ensureEmptyRouteSourceAndLayer(map: maplibregl.Map): void {
                 'line-opacity': 0.9,
             },
         } as maplibregl.LineLayerSpecification);
+    }
+
+    if (!map.getSource('route-joints')) {
+        const emptyJoints: FeatureCollection<Point> = { type: 'FeatureCollection', features: [] };
+        map.addSource('route-joints', {
+            type: 'geojson',
+            data: emptyJoints,
+        } as maplibregl.GeoJSONSourceSpecification);
+    }
+
+    if (!map.getLayer('route-joints')) {
+        map.addLayer({
+            id: 'route-joints',
+            type: 'circle',
+            source: 'route-joints',
+            paint: {
+                'circle-radius': 5,
+                'circle-color': '#00c853',
+                'circle-stroke-color': '#ffffff',
+                'circle-stroke-width': 1.5,
+            },
+        } as maplibregl.CircleLayerSpecification);
     }
 }
 

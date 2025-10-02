@@ -1,10 +1,33 @@
 import * as THREE from 'three';
 
 import { CustomLayerExtras, ModelTransform } from "../types";
-import { Feature, FeatureCollection, LineString, Position } from "geojson";
+import { Feature, FeatureCollection, LineString, Point, Position } from "geojson";
 import { fetchRouteLineString, lineStringToFeature } from "../services/routeService";
 
 import maplibregl from 'maplibre-gl';
+
+const addSegmentJoints = (
+    map: maplibregl.Map,
+    lineString: LineString
+) => {
+    const coords: Position[] = lineString.coordinates;
+    const jointFeatures: Feature<Point>[] = [];
+    for (let i = 0; i < coords.length; i++) {
+        const p = coords[i] as Position;
+        jointFeatures.push({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: p },
+            properties: {},
+        });
+    }
+    const jointsCollection: FeatureCollection<Point> = { type: 'FeatureCollection', features: jointFeatures };
+    const jointsSrc = map.getSource('route-joints') as maplibregl.GeoJSONSource | undefined;
+    if (jointsSrc) {
+        jointsSrc.setData(jointsCollection);
+    }
+
+    return { coords };
+};
 
 export function fetchAndDrawSampleRoute(
     map: maplibregl.Map,
@@ -25,8 +48,9 @@ export function fetchAndDrawSampleRoute(
             (map.getSource('route') as maplibregl.GeoJSONSource).setData(collection);
 
 
+            const { coords } = addSegmentJoints(map, lineString);
+
             /** This is needed to fit loaded route into camera view frame */
-            const coords: Position[] = lineString.coordinates;
             const bounds = coords.reduce(
                 (b, c) => b.extend(c as maplibregl.LngLatLike),
                 new maplibregl.LngLatBounds(
